@@ -1,0 +1,71 @@
+#!/bin/bash
+
+VERSION=${1:-1}
+
+# Run this with "bash go-ddev" to run speed tests with DDEV Composer. 
+
+# composer create-project 
+echo "dspeed1 composer create-project"
+mkdir dspeed1
+cd dspeed1
+ddev config --docroot=.  --project-type=drupal9 --project-name=dspeed1
+ddev start
+
+if [[ ${VERSION} -eq 2 ]]
+then
+  ddev exec sudo composer self-update --preview
+  ddev exec composer --version
+fi
+
+time ddev composer create drupal/recommended-project --profile 
+
+# Since ddev composer create automatic does a ddev restart, we need to re-update.
+if [[ ${VERSION} -eq 2 ]]
+then
+  ddev exec sudo composer self-update --preview
+  ddev exec composer --version
+fi
+
+echo "dspeed1 composer require"
+time ddev composer require drupal/pathauto:1.7.0 --profile
+ddev composer require drupal/pathauto --no-update
+echo "dspeed1 composer update"
+time ddev composer update drupal/pathauto --profile
+ddev stop --remove-data --omit-snapshot
+cd ..
+
+#mkdir dspeed2
+#cd dspeed2
+#ddev config --docroot=.  --project-type=drupal9 --project-name=dspeed2
+#ddev start
+#time ddev composer create drupal/recommended-project --profile -y
+
+#cd .. 
+#mkdir dspeed3
+#cd dspeed3
+#ddev config --docroot=.  --project-type=drupal9 --project-name=dspeed3
+#ddev start
+#time ddev composer create drupal/recommended-project --profile -y 
+
+# composer require
+#cd speed1
+#time composer require drupal/pathauto:1.7.0 --profile
+
+#cd ../speed2
+#time composer require drupal/pathauto:1.7.0 --profile
+
+#cd ../speed3
+#time composer require drupal/pathauto:1.7.0 --profile
+
+# composer update
+#cd speed1
+#composer require drupal/pathauto:^1.7 --no-update
+#time composer update drupal/pathauto --profile
+
+#cd ../speed2
+#composer require drupal/pathauto:^1.7 --no-update
+#time composer update drupal/pathauto --profile
+
+#cd ../speed3
+#composer require drupal/pathauto:^1.7 --no-update
+#time composer update drupal/pathauto --profile
